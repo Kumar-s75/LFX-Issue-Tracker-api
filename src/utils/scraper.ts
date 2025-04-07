@@ -6,7 +6,7 @@ export const scrapeOrganizations=async():Promise<string[]>=>{
     try {
         
         const browser=await puppeteer.launch({
-            executablePath:'/Applications/Google Chrome.app/Contents/'//replace with my chrome path
+            executablePath:'/Applications/Google Chrome.app/Contents/',//replace with my chrome path
             headless:true,
         })
         const page=await browser.newPage();

@@ -1,5 +1,5 @@
 import { fetchIssuesForOrg } from "./github";
-import {scrapeOrganisations} from '../utils/scraper'
+import {scrapeOrganizations} from '../utils/scraper'
 import { db } from "../db/db";
 import { GITHUB_API_URL } from "../config/env";
 import axios from 'axios';
@@ -22,7 +22,7 @@ export const getOrgName = async (github: string): Promise<string> => {
     return orgName;
 };
 
-export const fetchUnassignedIssues=async(organizations:string[]){
+export const fetchUnassignedIssues=async(organizations:string[])=>{
    const allIssues:any[]=[];
    for(const org of organizations){
     try{

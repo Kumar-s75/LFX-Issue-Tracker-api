@@ -14,7 +14,7 @@ try {
             Authorization:`token ${process.env.GITHUB_TOKEN}`,
         },
         params:{
-            per _page:100,
+            per_page:100,
             page,
         },
     });
@@ -44,7 +44,7 @@ export const fetchGithubIssues=async(org:string,repo:string):Promise<any[]>=>{
             },
             params:{
                 state:'open',
-                per _page:100,
+                per_page:100,
                 page,
             },
         });
@@ -82,5 +82,51 @@ export const fetchIssuesForOrg=async(org:string,repo:string):Promise<any[]>=>{
   }
 };
 
-export const getOrgsUnassignedIssues = async (orgs: any[]): Promise<any[]> => {
+
+export const getOrgsUnassignedIssues = async (orgs: any[]): Promise<any[]> => { 
+    try {
+        const allUnassignedIssues: any[] = [];
+
+        console.log("Fetching unassigned issues for organizations:", orgs);
+        const database = await db(); // make sure db() returns the connected MongoDB database
+
+        for (const org of orgs) {
+            const reposResponse = await axios.get(`${GITHUB_API_URL}/orgs/${org}/repos`, {
+                headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` },
+            });
+
+            const repos = reposResponse.data;
+
+            const topRepos = repos
+                .sort((a: { open_issues: number }, b: { open_issues: number }) => b.open_issues - a.open_issues)
+                .slice(0, 5);
+
+            for (const repo of topRepos) {
+                const issuesResponse = await axios.get(
+                    `${GITHUB_API_URL}/repos/${org}/${repo.name}/issues?state=open`,
+                    { headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } }
+                );
+
+                const issues = issuesResponse.data;
+                
+                for (const issue of issues) {
+                    await database.collection('lfx_issues').updateOne(
+                        { id: issue.id },
+                        { $set: issue },
+                        { upsert: true }
+                    );
+
+                    if (!issue.assignee) {
+                        allUnassignedIssues.push(issue);
+                    }
+                }
+            }
+        }
+
+        console.log("Fetched unassigned issues for organizations:", orgs);
+        return allUnassignedIssues.slice(0, 50);
+    } catch (error: any) {
+        console.error("Error fetching unassigned issues:", error.message);
+        return [];
+    }
 };
