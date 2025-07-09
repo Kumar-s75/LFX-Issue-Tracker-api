@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { GITHUB_API_URL } from '../config/env';
-import db from '../db/db';
+import { db } from '../db/db';
 
 export const fetchGithubRepos=async(org:string):Promise<string[]>=>{
 const url=`https://api.github.com/orgs/${org}/repos`;
@@ -88,7 +88,6 @@ export const getOrgsUnassignedIssues = async (orgs: any[]): Promise<any[]> => {
         const allUnassignedIssues: any[] = [];
 
         console.log("Fetching unassigned issues for organizations:", orgs);
-        const database = await db(); // make sure db() returns the connected MongoDB database
 
         for (const org of orgs) {
             const reposResponse = await axios.get(`${GITHUB_API_URL}/orgs/${org}/repos`, {
@@ -110,7 +109,7 @@ export const getOrgsUnassignedIssues = async (orgs: any[]): Promise<any[]> => {
                 const issues = issuesResponse.data;
                 
                 for (const issue of issues) {
-                    await database.collection('lfx_issues').updateOne(
+                    await db.collection('lfx_issues').updateOne(
                         { id: issue.id },
                         { $set: issue },
                         { upsert: true }
