@@ -201,14 +201,16 @@ export const getPopularIssuesAndSave = async (req: Request, res: Response): Prom
                             { headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } }
                         );
                         const issues = issuesResponse.data;
+                        console.log(issues.length, "here is the length");
 
                         for (const issue of issues) {
                             try {
-                                await db.collection('lfx_issues').updateOne(
+                                const updatedIssue = await db.collection('lfx_issues').updateOne(
                                     { id: issue.id },
                                     { $set: issue },
                                     { upsert: true }
                                 );
+                                console.log(updatedIssue.modifiedCount, "here are updated issues");
                             } catch (updateError) {
                                 console.error("Error updating issue:", updateError);
                                 // Continue without breaking the flow

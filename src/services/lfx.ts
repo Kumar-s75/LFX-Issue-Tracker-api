@@ -51,6 +51,6 @@ export const fetchUnassignedIssues=async(organizations:string[])=>{
     } catch (repoError: any) {
         console.error(`Error fetching repositories for org ${org}:`, repoError.message);
     }
+       return allIssues; 
     }
-   return allIssues;
    }

@@ -6,8 +6,6 @@ import cors from 'cors';
 import cookieParser from "cookie-parser";
 import expressWinston from "express-winston";
 import winston from "winston";
-import { errorHandler, notFoundHandler } from './middleware/errorHandler';
-import { rateLimiter } from './middleware/rateLimiter';
 
 // Load environment variables
 config({
@@ -56,9 +54,6 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 
-// Rate limiting
-app.use(rateLimiter());
-
 // Routes
 app.get('/', async (req, res) => {
     res.send('Server is working!');
@@ -66,7 +61,3 @@ app.get('/', async (req, res) => {
 
 app.use('/api/lfx', lfxRoutes);
 app.use('/api/data', dataRoutes);
-
-// Error handling middleware (must be last)
-app.use(notFoundHandler);
-app.use(errorHandler);
