@@ -29,3 +29,4 @@ export const scrapeOrganizations=async():Promise<string[]>=>{
         throw error;
     }
 };
+
