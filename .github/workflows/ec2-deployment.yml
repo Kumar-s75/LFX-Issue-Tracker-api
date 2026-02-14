@@ -23,8 +23,17 @@ jobs:
     - run: npm cache clean --force
     - run: rm -rf node_modules
     - run: npm ci
-    - run: |
-        touch .env
-        echo "${{ secrets.PROD_ENV }}" > .env
-    - run: npm run build --if-present
-    - run: pm2 restart github-api
+    - name: Create .env file
+      env:
+        PROD_ENV: ${{ secrets.PROD_ENV }}
+      run: |
+        echo "$PROD_ENV" > .env
+    - name: Build
+      run: npm run build
+    - name: Deploy with PM2
+      run: |
+        if pm2 describe github-api > /dev/null 2>&1; then
+          pm2 restart github-api --update-env
+        else
+          pm2 start dist/server.js --name github-api
+        fi
